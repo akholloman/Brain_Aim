@@ -12,7 +12,9 @@
   "author": "HTIL at UA",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.16.2",
     "node-osc": "^2.1.0",
-    "pug": "^2.0.0-rc.4"
+    "pug": "^2.0.0-rc.4",
+    "socket.io": "^2.0.4"
   }
 }

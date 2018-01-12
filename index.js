@@ -4,7 +4,10 @@ let path = require("path");
 let config = require("./config.js");
 
 // HTTP Includes
-let http = require("http");
+let express = require("express");
+let app = express();
+let server = require("http").Server(app);
+let io = require("socket.io")(server);
 let pug = require("pug");
 
 // Create OSC server for handling data from MUSE
@@ -15,11 +18,22 @@ osc_server.on("message", (msg, rinfo) => {
 	console.log(msg);
 });
 
-// Create HTTP Server
-const server = http.createServer((req, res) => {
-	res.end(pug.renderFile("index.pug", {
-		title: "Brain Aim"
-	}));
+// express config routes
+app.set("view engine", "pug");
+app.use(express.static("public"));
+app.get("/", (req, res) => {
+	res.render("index", {title: "Brain Aim"});
+});
+
+//Display through socket
+let clients = {};
+
+io.on("connection", (client) => {
+	console.log("Connected");
+	
+	client.on("arrows", (pressed) => {
+		//to do
+	});
 });
 
 server.listen(config.WEB.PORT, config.WEB.HOST, () => {
