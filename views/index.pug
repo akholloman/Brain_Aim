@@ -3,12 +3,19 @@ html(lang="en")
 	head
 		title= title
 		link(rel="stylesheet", href="/css/style.css")
+		link(rel="stylesheet", href="/css/modal.css")
+		link(rel="stylesheet", href="node_modules/")
 	body
 		div(class="pointer-container")
 			div(id="pointer")
 				span(style="font-size: 40px;") *
 		div(id="croquis-container")
+		
+		div(id="selection", style="display: none")
+			h1 SELECT YOUR PLAYER
+			div(id="players")
 
 		script(src="/socket.io/socket.io.js")
 		script(src="/js/croquis.js")
+		script(src="/js/modal.js")
 		script(src="/js/client.js")

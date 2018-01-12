@@ -3,14 +3,50 @@ body {
 	background-color: #EEEEEE;
 }
 
-#croquis-container {
+radiogroup {
 	width: 100%;
-	/* border: 0.25em ridge black; */
-	box-shadow: 3px 3px 8px #BDBDBD;
+}
+
+/* Rainbow effect from https://codepen.io/nohoid/pen/kIfto */
+@-webkit-keyframes rainbow {
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+@-moz-keyframes rainbow {
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+@-o-keyframes rainbow {
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+@keyframes rainbow { 
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+
+.modal-inner {
+	background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
+	background-size: 1800% 1800%;
+
+	-webkit-animation: rainbow 18s ease infinite;
+	     -z-animation: rainbow 18s ease infinite;
+	     -o-animation: rainbow 18s ease infinite;
+	        animation: rainbow 18s ease infinite;
 }
 
 .pointer-container {
 	position: absolute;
+}
+
+#croquis-container {
+	width: 100%;
+	/* border: 0.25em ridge black; */
+	box-shadow: 3px 3px 8px #BDBDBD;
 }
 
 #pointer {
