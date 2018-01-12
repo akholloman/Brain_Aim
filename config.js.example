@@ -1,4 +1,10 @@
 module.exports = {
-    PORT: 9000,
-    HOST: "0.0.0.0"
+    MUSE: {
+        PORT: 9000,
+        HOST: "0.0.0.0"
+    },
+    WEB: {
+        PORT: 3000,
+        HOST: "0.0.0.0"
+    }
 };
