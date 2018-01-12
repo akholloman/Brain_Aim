@@ -4,10 +4,11 @@ html(lang="en")
 		title= title
 		link(rel="stylesheet", href="/css/style.css")
 	body
-		h1 Hello, world!
-
-		canvas(id="canvas")
-			p This is not supported on this browser :(
+		div(class="pointer-container")
+			div(id="pointer")
+				span(style="font-size: 40px;") *
+		div(id="croquis-container")
 
 		script(src="/socket.io/socket.io.js")
+		script(src="/js/croquis.js")
 		script(src="/js/client.js")

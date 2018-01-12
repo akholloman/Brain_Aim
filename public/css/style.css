@@ -1,0 +1,23 @@
+body {
+	margin: 1em 4em;
+	background-color: #EEEEEE;
+}
+
+#croquis-container {
+	width: 100%;
+	/* border: 0.25em ridge black; */
+	box-shadow: 3px 3px 8px #BDBDBD;
+}
+
+.pointer-container {
+	position: absolute;
+}
+
+#pointer {
+	position: relative;
+	font-size: 0;
+	pointer-events: none;
+	z-index: 9999;
+	left: 0px;
+	top: 0px;
+}
