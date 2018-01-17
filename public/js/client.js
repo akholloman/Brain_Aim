@@ -10,6 +10,9 @@ container.appendChild(croquis.getDOMElement());
 croquis.setCanvasSize(width, height);
 croquis.addLayer();
 croquis.fillLayer("#fff");
+// FIXME: See if this is worth it
+// croquis.setToolStabilizeLevel(20);
+// croquis.setToolStabilizeWeight(0.5);
 
 // Brush
 var brush = new Croquis.Brush();
@@ -32,26 +35,56 @@ document.onkeyup   = handler;
 var content = document.getElementById("selection").cloneNode(true);
 content.style.display = "";
 var modal = new Modal(content, true);
-// modal.show();
+modal.show();
 
 // Socket Events
-let queue = [];
+let players = [];
+socket.on("new-player", (name) => {
+	addPlayer(name);
+});
+
+socket.on("players", (players) => {
+	players.forEach((player) => {
+		addPlayer(player);
+	});
+});
+
+socket.on("start", () => {
+	modal.unmount();
+});
+
 socket.on("position", (options) => {
+	var old = options.position.old;
+	var cur = options.position.cur;
+
     // Update cursor if position belongs to the client
     if (options.id === socket.id) {
-        pointer.style.top  = "" + (options.nposition.y - 17) + "px";
-        pointer.style.left = "" + (options.nposition.x - 10) + "px";
+        pointer.style.top  = "" + (cur.y - 17) + "px";
+        pointer.style.left = "" + (cur.x - 10) + "px";
     }
-    
-    brush.setColor(options.color);
-    croquis.down(options.oposition.x, options.oposition.y);
-    croquis.up(options.nposition.x, options.nposition.y);
+	
+	// Update the brush for the player
+	brush.setSize(options.brush.size);
+	brush.setColor(options.brush.color);
+	
+	// Draw the trail
+    croquis.down(old.x, old.y);
+    croquis.up(cur.x, cur.y);
 });
 
 socket.on("progress", (percentage) => {
     console.log(data);
 });
 
-socket.on("brush", (brush) => {
-    console.log(data);
-});
+// Helper methods
+function addPlayer(name) {
+	players.push(name);
+
+	var btn = document.createElement("button");
+	btn.innerHTML = name;
+	btn.onclick = () => {
+		socket.emit("select-player", name);
+	};
+
+	document.getElementById("players").appendChild(btn);
+}
