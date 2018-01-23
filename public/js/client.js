@@ -90,8 +90,7 @@ socket.on("player-selected", (opts) => {
 // Resets the playing stage and renders the final image to the client in another tab
 socket.on("restart", () => {
 	// Present the generated image to the user
-	var url = pimg.src.replace(/^data:image\/[^;]+/, 'data:application/octet-stream');
-	window.open(url, "_blank");
+	saveAs(pimg.src, "collaborative.png");
 
 	// Reset the stage
 	modal.show();
@@ -187,4 +186,20 @@ function addPlayer(name, taken) {
 	}
 
 	document.getElementById("players").appendChild(btn);
+}
+
+
+// Saves a URI as the provided filename
+// Source: https://stackoverflow.com/a/26361461
+function saveAs(uri, filename) {
+	var link = document.createElement('a');
+	if (typeof link.download === 'string') {
+		document.body.appendChild(link); // Firefox requires the link to be in the body
+		link.download = filename;
+		link.href = uri;
+		link.click();
+		document.body.removeChild(link); // remove the link when done
+	} else {
+		location.replace(uri);
+	}
 }

@@ -119,7 +119,9 @@ io.on("connection", (client) => {
 			for (const id of Object.keys(clients)) {
 				clients[id].position = {x: 0, y: 0};
 				waves[clients[id].player].client = null;
-				clients[id].player = null;
+				
+				clients[id].player  = null;
+				clients[id].pressed = {};
 			}
 		}, GAME_TIME_MS);
 	});
