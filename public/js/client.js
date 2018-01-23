@@ -90,7 +90,8 @@ socket.on("player-selected", (opts) => {
 // Resets the playing stage and renders the final image to the client in another tab
 socket.on("restart", () => {
 	// Present the generated image to the user
-	window.open(pimg.src, "_blank");
+	var url = pimg.src.replace(/^data:image\/[^;]+/, 'data:application/octet-stream');
+	window.open(url, "_blank");
 
 	// Reset the stage
 	modal.show();

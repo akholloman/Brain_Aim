@@ -167,12 +167,12 @@ let loop = () => {
 		// Only broadcast position when it has moved
 		if (old.x !== client.position.x || old.y !== client.position.y) {
 			// Remaps a value into the range [0, 1] given its min and max
-			let remap = (x) => (x.value - x.min) / x.max;
+			let remap = (x) => (x.value - x.min) / (x.max - x.min);
 
 			// Wave percentages
 			let w = waves[client.player];
 			let ap = remap(w.alpha);
-			let bp = 0.75 - remap(w.beta);
+			let bp = 0.5 - remap(w.beta);
 
 			// Add random jitter to the movement
 			let n = noise(1 - ap, NOISE_FACTOR);
