@@ -1,6 +1,9 @@
 body {
 	margin: 1em 4em;
 	background-color: #EEEEEE;
+	-webkit-transition: background-color 250ms linear;
+        -ms-transition: background-color 250ms linear;
+	        transition: background-color 250ms linear;
 }
 
 h1 {
@@ -89,6 +92,14 @@ button::-moz-focus-inner {
 	position: absolute;
 }
 
+.selected {
+	background: #1de840;
+}
+
+.not-selectable {
+	text-decoration: line-through;
+}
+
 #croquis-container {
 	width: 100%;
 	margin: 0 auto;
@@ -103,4 +114,9 @@ button::-moz-focus-inner {
 	z-index: 9999;
 	left: 0px;
 	top: 0px;
+}
+
+#progress-timer {
+	margin: 0.5em auto;
+	text-align: center;
 }

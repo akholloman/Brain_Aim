@@ -15,9 +15,12 @@ html(lang="en")
 			h1 SELECT YOUR PLAYER
 			div(id="players")
 		
-		progress(id="progress-bar")
+		h2(id="progress-timer") 00:00
 		//- Render a hidden image for use with the progress bar
 		image(id="progress-image", style="display: none;")
+
+		//- Brush mask
+		image(id="brush", src="/image/b1.png", style="display: none;")
 
 		script(src="/socket.io/socket.io.js")
 		script(src="/js/croquis.js")
