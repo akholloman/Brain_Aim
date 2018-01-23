@@ -35,18 +35,6 @@ button {
 	margin: 0.1em;
 }
 
-progress {
-	width: 100%;
-	margin: 0.5em 0;
-	color: grey;
-	-moz-progress-bar { background-color: #000 !important; }
-	/* background-color: grey; */
-
-	-webkit-appearance: none;
-	   -moz-appearance: none;
-	        appearance: none;
-}
-
 button:hover {
 	background-color: #66666655;
 }

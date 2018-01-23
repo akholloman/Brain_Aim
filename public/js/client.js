@@ -93,6 +93,11 @@ socket.on("restart", () => {
 	window.open(pimg.src, "_blank");
 
 	// Reset the stage
+	modal.show();
+	croquis.fillLayer("#fff");
+	clearInterval(progressHandler);
+
+	// Clear the client button stylings
 	var sels = document.getElementsByClassName("selected");
 	var nots = document.getElementsByClassName("not-selectable");
 	for (var i = 0; i < sels.length; ++i) {
@@ -102,10 +107,6 @@ socket.on("restart", () => {
 	for (var i = 0; i < nots.length; ++i) {
 		nots[i].classList.remove("not-selectable");
 	}
-
-	modal.show();
-	croquis.fillLayer("#fff");
-	clearInterval(progressHandler);
 
 	pointer.style.top  = "-17px";
 	pointer.style.left = "-10px";
