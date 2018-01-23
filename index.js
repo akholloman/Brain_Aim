@@ -39,11 +39,7 @@ let palette = null;
 // Constants
 const MSPF = (1.0 / 30.0) * 1000; // Microseconds per Frame (30 fps)
 const MOVE_FACTOR = 5;
-
-const KEY_LEFT  = 37;
-const KEY_UP    = 38;
-const KEY_RIGHT = 39;
-const KEY_DOWN  = 40;
+const GAME_TIME_MS = 3 * 60 * 1000;
 
 // express config routes
 app.set("view engine", "pug");
@@ -71,12 +67,27 @@ io.on("connection", (client) => {
 
 		client.player = name;
 
-		if (Object.keys(clients).length === Object.keys(waves).length) {
-			loopHandler = setInterval(loop, MSPF);
-			palette = dc(Object.keys(clients) * 2);
-
-			io.emit("start", null);
+		// Short circuit if there are still players without a name
+		for (const id of Object.keys(clients)) {
+			if (!clients[id].player)
+				return;
 		}
+
+		loopHandler = setInterval(loop, MSPF);
+		palette = dc(Object.keys(clients) * 2);
+
+		io.emit("start", null);
+		setTimeout(() => {
+			clearInterval(loopHandler);
+			io.emit("restart", null);
+
+			// Reset client positions
+			for (const id of Object.keys(clients)) {
+				clients[id].position = {x: 0, y: 0};
+			}
+
+			// TODO: Implement reset
+		}, GAME_TIME_MS);
 	});
 
 	client.on("bounds" , (b) => {
@@ -107,15 +118,17 @@ let loop = () => {
 			};
 		}
 
+		let delta = {x: 0, y: 0};
 		for (let code in client.pressed) {
-			client.position.y += (code.match("Down") && client.pressed[code] ? MOVE_FACTOR : 0) +
+			delta.y += (code.match("Down") && client.pressed[code] ? MOVE_FACTOR : 0) +
 				(code.match("Up") && client.pressed[code] ? -MOVE_FACTOR : 0);
-			client.position.x += (code.match("Right") && client.pressed[code] ? MOVE_FACTOR : 0) +
+			delta.x += (code.match("Right") && client.pressed[code] ? MOVE_FACTOR : 0) +
 				(code.match("Left") && client.pressed[code] ? -MOVE_FACTOR : 0);
 		}
 
-		client.position.x = clamp(client.position.x, -1, bounds.x);
-		client.position.y = clamp(client.position.y, -1, bounds.y);
+		delta = normalize(delta, MOVE_FACTOR);
+		client.position.x = clamp(delta.x + client.position.x, -1, bounds.x);
+		client.position.y = clamp(delta.y + client.position.y, -1, bounds.y);
 
 		// Only broadcast position when it has moved
 		if (old.x !== client.position.x || old.y !== client.position.y) {
@@ -130,7 +143,7 @@ let loop = () => {
 				},
 				brush: {
 					color: chroma.mix(client.color.from, client.color.to, bp).hex(),
-					size: 15 * (1 + 10 * waves[client.player].beta)
+					size: 15 * (0.5 + 15 * waves[client.player].beta)
 				}
 			});
 		}
@@ -147,4 +160,19 @@ function clamp(value, minimum, maximum) {
 	if (maximum && value > maximum) return maximum;
 
 	return value;
+}
+
+// Given a 2D vector v and a magnitude n,
+// returns a vector with the same direction as v
+// but with a magnitude of n
+function normalize(v, n) {
+	let res = Object.assign({}, v);
+	let len = Math.hypot(res.x, res.y);
+	
+	if (len > n) {
+		res.x = res.x / len * n;
+		res.y = res.y / len * n;
+	}
+
+	return res;
 }

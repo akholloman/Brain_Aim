@@ -13,3 +13,5 @@ modal
 - [Rainbow Background CSS Effect](https://codepen.io/nohoid/pen/kIfto): Used for the modal's changing
 background
 - [Croquis.js](https://github.com/disjukr/croquis.js/tree/master): HTML5 Drawing tool library
+- [Color Thief](https://github.com/lokesh/color-thief): Used for finding the dominant color and determining the
+current winner.

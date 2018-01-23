@@ -14,8 +14,14 @@ html(lang="en")
 		div(id="selection", style="display: none")
 			h1 SELECT YOUR PLAYER
 			div(id="players")
+		
+		progress(id="progress-bar")
+		//- Render a hidden image for use with the progress bar
+		image(id="progress-image", style="display: none;")
 
 		script(src="/socket.io/socket.io.js")
 		script(src="/js/croquis.js")
 		script(src="/js/modal.js")
+		script(src="/js/color-thief.min.js")
+
 		script(src="/js/client.js")

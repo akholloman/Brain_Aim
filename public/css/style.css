@@ -29,6 +29,19 @@ button {
 
 	width: 100%;
 	padding: 0.25em;
+	margin: 0.1em;
+}
+
+progress {
+	width: 100%;
+	margin: 0.5em 0;
+	color: grey;
+	-moz-progress-bar { background-color: #000 !important; }
+	/* background-color: grey; */
+
+	-webkit-appearance: none;
+	   -moz-appearance: none;
+	        appearance: none;
 }
 
 button:hover {
@@ -78,6 +91,7 @@ button::-moz-focus-inner {
 
 #croquis-container {
 	width: 100%;
+	margin: 0 auto;
 	/* border: 0.25em ridge black; */
 	box-shadow: 3px 3px 8px #BDBDBD;
 }
