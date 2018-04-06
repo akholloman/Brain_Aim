@@ -55,7 +55,7 @@ let chroma = require("chroma-js");
 let palette = null;
 
 // Constants
-const GAME_TIME_MS = 20 * 1000;//3 * 60 * 1000;
+const GAME_TIME_MS = 3 * 60 * 1000;
 
 // Mechanic Maps
 let clients = {};
