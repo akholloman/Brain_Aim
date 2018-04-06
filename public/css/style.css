@@ -1,46 +1,15 @@
 body {
-	margin: 1em 4em;
+	padding: 54px 54px 54px 0;
 	background-color: #EEEEEE;
 	-webkit-transition: background-color 250ms linear;
         -ms-transition: background-color 250ms linear;
 	        transition: background-color 250ms linear;
 }
 
-h1 {
-	color: white;
-	font-family: Arial, Helvetica, sans-serif;
-	font-weight: 900;
-
-	-webkit-text-stroke: 1px black;
-	        text-stroke: 1px black;
-}
-
-button {
-	background-color: transparent;
-	background-repeat: no-repeat;
-	border: 0.01em solid white;
-	outline: none;
-	cursor: pointer;
-
-	color: white;
-	font-family: Arial, Helvetica, sans-serif;
-	font-weight: 900;
-	font-size: 1.2em;
-	text-transform: uppercase;
-	-webkit-text-stroke: 1px black;
-	        text-stroke: 1px black;
-
-	width: 100%;
-	padding: 0.25em;
-	margin: 0.1em;
-}
-
-button:hover {
-	background-color: #66666655;
-}
-
-button::-moz-focus-inner {
-	border: 0;
+@media (min-width: 992px) {
+	body {
+		padding: 56px;
+	}
 }
 
 /* Rainbow effect from https://codepen.io/nohoid/pen/kIfto */
@@ -65,7 +34,7 @@ button::-moz-focus-inner {
 	100%{background-position:0% 82%}
 }
 
-.modal-inner {
+.rain {
 	background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
 	background-size: 1800% 1800%;
 	color: white;
@@ -80,17 +49,14 @@ button::-moz-focus-inner {
 	position: absolute;
 }
 
-.selected {
-	background: #1de840;
-}
-
 .not-selectable {
 	text-decoration: line-through;
 }
 
 #croquis-container {
-	width: 100%;
-	margin: 0 auto;
+	height: 30em;
+	width: 64em;
+	margin: 0.25em auto;
 	/* border: 0.25em ridge black; */
 	box-shadow: 3px 3px 8px #BDBDBD;
 }

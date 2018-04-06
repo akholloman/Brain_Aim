@@ -1,0 +1,14 @@
+extends base.pug
+
+mixin renderImage(path)
+	div(class="col-lg-3 col-md-4 col-xs-6")
+		a(href="gallery/" + path class="d-block mb-4 h-100")
+			img(class="img-fluid img-thumbnail" src="/image/gallery/" + path alt="")
+
+block content
+	div(class="container")
+		h1(class="text-center text-lg-center") Gallery
+
+		div(class="row text-center text-lg-left")
+			each path in paths
+				+renderImage(path)

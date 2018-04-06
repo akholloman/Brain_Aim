@@ -1,0 +1,39 @@
+extends base.pug
+
+block content
+	div(id="gameLobby")
+		h1 Game Lobby
+		h2 Players
+		ul(id="players" class="mb-1 list-group")
+
+		button(id="ready-button" class="btn btn-success btn-block") Ready
+	div(id="gameRunning" style="display: none;")
+		div(id="croquis-container")
+			div(class="pointer-container")
+				div(id="pointer")
+					span(style="font-size: 40px;") *
+	
+		h2(id="progress-timer") 00:00
+	
+	//- Render a hidden image in order to show current color in the lead
+	image(id="progress-image" style="display: none;")
+
+	//- Brush mask
+	image(id="brush", src="/image/b3.png" style="display: none;")
+
+	//- Templates
+	template(id="player-template")
+		<li class="list-group-item d-flex justify-content-between align-items-center">
+			_name_ 
+			<span class="badge badge-primary badge-pill" style="display: none;">✓</span>
+		</li>
+
+block scripts
+	//- Scripts
+	script(src="/socket.io/socket.io.js")
+	script(src="/js/socket.io-stream.js")
+	script(src="/js/croquis.js")
+	script(src="/js/color-thief.min.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.6/chroma.min.js" crossorigin="anonymous")
+
+	script(src="/js/client.js")

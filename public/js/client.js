@@ -1,20 +1,18 @@
 // DOM Elements / Canvas
-var container = document.getElementById("croquis-container");
-var pointer = document.getElementById("pointer");
-var pbar = document.getElementById("progress-bar");
-var pimg = document.getElementById("progress-image");
+const container = document.getElementById("croquis-container");
+const pointer = document.getElementById("pointer");
+const pimg = document.getElementById("progress-image");
 
 // Constants
-const width = container.clientWidth;
-const height = 500;
 const progress_loop_ms = 5 * 1000;
+const MSPF = (1.0 / 30.0) * 1000; // Milliseconds per Frame (30 fps)
+const MOVE_FACTOR = 5;
+const NOISE_FACTOR = 3;
+const GAME_TIME_MS = 3 * 60 * 1000;
 
 // Art library
 var croquis = new Croquis();
 container.appendChild(croquis.getDOMElement());
-croquis.setCanvasSize(width, height);
-croquis.addLayer();
-croquis.fillLayer("#fff");
 
 // Color thief
 var color_thief = new ColorThief();
@@ -22,95 +20,113 @@ var color_thief = new ColorThief();
 // Brush
 var brush = new Croquis.Brush();
 brush.setSize(10);
-brush.setImage(document.getElementById("brush"));
-croquis.setTool(brush);
 
 // Sockets
 var socket = io();
-socket.emit("bounds", {x: width, y: height});
+
+// Player mechanics
+var position = {x: 0, y: 0};
+var pressed = {};
+var colors = null;
+var wave = null;
+var upload = false;
 
 // Key handlers for brush movement
-var handler = (event) => {
-    if (event && event.code && event.code.match("Arrow"))
-        socket.emit("key", {code: event.code, type: event.type});
-};
-document.onkeydown = handler;
-document.onkeyup   = handler;
+var handler = function (event) {
+	if (event && event.code && event.code.match("Arrow")) {
+		pressed[event.code] = (event.type === "keydown");
 
-// Selection Modal
-var content = document.getElementById("selection").cloneNode(true);
-content.style.display = "";
-var modal = new Modal(content, true);
-modal.show();
+		// Stop the keys from propegating
+		event.preventDefault();
+	}
+};
+
+// Button Events
+document.getElementById("ready-button").onclick = function () {
+	socket.emit("ready");
+	this.setAttribute("disabled", true);
+	this.innerText = "Waiting for other players...";
+};
 
 // Socket Events
 // Socket: new-player
 // Fired when a new client connects to the server
 // Adds a new selectable item to the character selection modal
-let players = [];
-socket.on("new-player", (name) => {
-	addPlayer(name, false);
+socket.on("player", function (player) {
+	var template = document.getElementById("player-template");
+	var clone = document.importNode(template.content, true);
+	clone.children[0].childNodes[0].data = player.name;
+	clone.children[0].id = player.id;
+
+	if (player.id === socket.id) {
+		clone.children[0].classList.add("active");
+	}
+
+	document.getElementById("players").appendChild(clone);
 });
 
 // Socket: players
 // Fired when the client connects for the first time
 // Bulk adds all of the available BCI devices to the character selection modal
-socket.on("players", (players) => {
-	players.forEach((player) => {
-		addPlayer(player.name, player.taken);
-	});
+socket.on("players", function (players) {
+	for (var key in players) {
+		if (players.hasOwnProperty(key)) {
+			var player = players[key];
+			var template = document.getElementById("player-template");
+			var clone = document.importNode(template.content, true);
+			clone.children[0].childNodes[0].data = player.name;
+			clone.children[0].id = player.id;
+
+			if (player.ready) {
+				clone.children[0].children[0].style = "";
+			}
+
+			document.getElementById("players").appendChild(clone);
+		}
+	}
 });
 
-// Socket: player-selected
-// Fired when the server successfully selets a player for any connected client
-// Either adds a strikethrough to a no longer available character or green highlights the
-//   client's selected user
-socket.on("player-selected", (opts) => {
-	// Show feedback of the chosen user
-	if (opts.id === socket.id) {
-		// Make sure a name isn't already selected
-		if (document.getElementsByClassName("selected")) {
-			var els = document.getElementsByClassName("selected");
-			for (var i = 0; i < els.length; ++i) {
-				els[i].classList.remove("selected");
-			}
-		}
+socket.on("player-disconnect", function (data) {
+	var del = document.getElementById(data.id);
+	document.getElementById("players").removeChild(del);
+});
 
-		// Select the user chosen name
-		document.getElementById(opts.name).classList.add("selected");
-	} else {
-		var btn = document.getElementById(opts.name);
-		btn.classList.add("not-selectable");
-		btn.disabled = true;
+socket.on("ready", function (id) {
+	document.getElementById(id).getElementsByTagName("span")[0].style = "";
+});
+
+socket.on("color", function (data) {
+	if (data.id === socket.id) {
+		colors = data.colors;
+		console.log(colors[0]._rgb);
 	}
+});
+
+socket.on("uploader", function () {
+	upload = true;
+});
+
+socket.on("error", function () {
+	window.location.replace(window.location.origin + "/error/Player disconnected unexpectedly");
 });
 
 // Socket: restart
 // Fired when the server restarts the game
-// Resets the playing stage and renders the final image to the client in another tab
-socket.on("restart", () => {
-	// Present the generated image to the user
-	saveAs(pimg.src, "collaborative.png");
-
-	// Reset the stage
-	modal.show();
-	croquis.fillLayer("#fff");
+// Redirects to the gallery entry with the image
+socket.on("restart", code => {
+	// Kill the loops
+	clearInterval(loopHandler);
 	clearInterval(progressHandler);
 
-	// Clear the client button stylings
-	var sels = document.getElementsByClassName("selected");
-	var nots = document.getElementsByClassName("not-selectable");
-	for (var i = 0; i < sels.length; ++i) {
-		sels[i].classList.remove("selected");
+	if (upload) {
+		console.log("UPLOADING");
+		var stream = ss.createStream();
+
+		ss(socket).emit("gif-frame", stream);
+		stream.write(croquis.getLayerCanvas(0).toDataURL());
 	}
 
-	for (var i = 0; i < nots.length; ++i) {
-		nots[i].classList.remove("not-selectable");
-	}
-
-	pointer.style.top  = "-17px";
-	pointer.style.left = "-10px";
-	document.body.style.background = "#EEEEEE";
+	window.location.replace(window.location.origin + "/gallery/" + code);
 });
 
 // Socket: start
@@ -118,14 +134,41 @@ socket.on("restart", () => {
 // Begins the game by closing the character selection modal and starting the progress monitoring
 //   loop which determines the dominant color in the canvas
 var progressHandler = null;
+var loopHandler = null;
 socket.on("start", () => {
-	modal.unmount();
+	console.log("START");
+	// Hide the player dialog
+	document.getElementById("gameLobby").style = "display: none;";
 
-	progressHandler = setInterval(() => {
+	// Show the game mechanics
+	document.getElementById("gameRunning").style = "";
+
+	// Setup the canvas
+	croquis.setCanvasSize(container.clientWidth, container.clientHeight);
+	croquis.addLayer();
+	croquis.fillLayer("#fff");
+	brush.setImage(document.getElementById("brush"));
+	croquis.setTool(brush);
+
+	// Capture user input
+	document.onkeydown = handler;
+	document.onkeyup   = handler;
+
+	loopHandler = setInterval(loop, MSPF);
+
+	progressHandler = setInterval(function () {
 		pimg.setAttribute("src", croquis.getLayerCanvas(0).toDataURL());
 
 		var colors = color_thief.getColor(pimg);
 		document.body.style.background = "#" + colors.map(x => x.toString(16)).reduce((acc, cur) => acc + cur);
+
+		if (upload) {
+			console.log("UPLOADING");
+			var stream = ss.createStream();
+
+			ss(socket).emit("gif-frame", stream);
+			stream.write(croquis.getLayerCanvas(0).toDataURL());
+		}
 	}, progress_loop_ms);
 });
 
@@ -148,8 +191,8 @@ socket.on("position", (options) => {
 	brush.setColor(options.brush.color);
 	
 	// Draw the trail
-    croquis.down(old.x, old.y);
-    croquis.up(cur.x, cur.y);
+	croquis.down(old.x, old.y);
+	croquis.up(cur.x, cur.y);
 });
 
 // Socket: update-time
@@ -166,28 +209,82 @@ socket.on("update-time", (time_s) => {
 	document.getElementById("progress-timer").innerHTML = min + ":" + sec;
 });
 
-// Helper methods
-// Function: addPlayer
-// Adds a new selectable item to the character select modal with the name `name`. If the name is
-//   taken, then this will also disable the button and add a strikethrough to the button's text
-function addPlayer(name, taken) {
-	players.push(name);
+// Main Game loop
+var loop = function () {
+	let old = Object.assign({}, position);
 
-	var btn = document.createElement("button");
-	btn.setAttribute("id", name);
-	btn.innerHTML = name;
-	btn.onclick = () => {
-		socket.emit("select-player", name);
-	};
-
-	if (taken) {
-		btn.classList.add("not-selectable");
-		btn.disabled = true;
+	let delta = {x: 0, y: 0};
+	for (let code in pressed) {
+		delta.y += (code.match("Down") && pressed[code] ? MOVE_FACTOR : 0) +
+			(code.match("Up") && pressed[code] ? -MOVE_FACTOR : 0);
+		delta.x += (code.match("Right") && pressed[code] ? MOVE_FACTOR : 0) +
+			(code.match("Left") && pressed[code] ? -MOVE_FACTOR : 0);
 	}
 
-	document.getElementById("players").appendChild(btn);
+	delta = normalize(delta, MOVE_FACTOR);
+	position.x = clamp(delta.x + position.x, -1, container.clientWidth);
+	position.y = clamp(delta.y + position.y, -1, container.clientHeight);
+
+	// Only broadcast position when it has moved
+	if (old.x !== position.x || old.y !== position.y) {
+		// Remaps a value into the range [0, 1] given its min and max
+		let remap = (x) => (x.value - x.min) / (x.max - x.min);
+
+		// Wave percentages
+		let ap = 0.5; //remap(waves.alpha);
+		let bp = 0.5; //0.5 - remap(waves.beta);
+
+		// Add random jitter to the movement
+		let n = noise(1 - ap, NOISE_FACTOR);
+		position.x += n.x;
+		position.y += n.y;
+
+		socket.emit("position", {
+			id: socket.id,
+			position: {
+				old: old,
+				cur: position
+			},
+			brush: {
+				color: chroma.mix(colors[0]._rgb, colors[1]._rgb, bp).hex(),
+				// TODO: Change this to be factored by the ratio of the clientWidth
+				size: 45 * (0.25 + 1.5 * ap) // Adjust the range from [0, 1] -> [0.25, 1.75]
+			}
+		});
+	}
+};
+
+// Helper methods
+function clamp(value, minimum, maximum) {
+	if (minimum !== undefined && value < minimum) return minimum;
+	if (maximum !== undefined && value > maximum) return maximum;
+
+	return value;
 }
 
+// Given a 2D vector v and a magnitude n,
+// returns a vector with the same direction as v
+// but with a magnitude of n
+function normalize(v, n) {
+	let res = Object.assign({}, v);
+	let len = Math.hypot(res.x, res.y);
+	let mag = n || 1;
+
+	if (len) {
+		res.x = res.x / len * mag;
+		res.y = res.y / len * mag;
+	}
+
+	return res;
+}
+
+// Given a percentage p, returns a vector with amplitude n * p and a random direction
+function noise(p, n) {
+	let xn = Math.random() - 0.5;
+	let yn = Math.random() - 0.5;
+
+	return normalize({x: xn, y: yn}, p * n);
+}
 
 // Saves a URI as the provided filename
 // Source: https://stackoverflow.com/a/26361461
