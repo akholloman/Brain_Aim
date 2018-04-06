@@ -98,6 +98,7 @@ app.get("/gallery", (req, res) => {
 	const gallery = path.join(__dirname, "public", "image", "gallery");
 
 	fs.readdir(gallery, (err, files) => {
+		files = files.filter(x => x.includes(".gif"));
 		res.render("gallery", {title: "NeuroBrush", paths: files});
 	});
 });
@@ -105,6 +106,7 @@ app.get("/gallery/:id", (req, res) => {
 	const gallery = path.join(__dirname, "public", "image", "gallery");
 
 	fs.readdir(gallery, (err, files) => {
+		files = files.filter(x => x.includes(".gif"));
 		if (!req.params.id || files.indexOf(req.params.id) < 0) {
 			return res.status(400).render("error", {title: "NeuroBrush", errorCode: 400, errorMsg: "Image with specified ID not found"});
 		}

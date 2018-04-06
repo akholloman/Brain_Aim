@@ -126,7 +126,7 @@ socket.on("restart", code => {
 		stream.write(croquis.getLayerCanvas(0).toDataURL());
 	}
 
-	window.location.replace(window.location.origin + "/gallery/" + code);
+	window.location.replace(window.location.origin + "/gallery/" + code + ".gif");
 });
 
 // Socket: start
