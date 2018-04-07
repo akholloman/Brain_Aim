@@ -1,5 +1,5 @@
 import { MuseClient, MUSE_SERVICE, channelNames } from 'muse-js';
-import Ganglion from '../../ganglion-ble/dist/ganglion-ble.umd.js';
+import Ganglion from '../node_modules/ganglion-ble/dist/ganglion-ble.umd.js';
 
 // Since Ganglion refuses to export their dervice id, it is copied here
 const GANGLION_SERVICE = 0xfe84;
