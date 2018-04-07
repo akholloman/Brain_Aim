@@ -91,7 +91,7 @@ document.getElementById("ready-button").onclick = async function () {
 	await btdev.connect();
 	socket.emit("ready");
 	document.getElementById("ready-button").setAttribute("disabled", true);
-	document.getElementById("ready-button").innerText = "Waiting for other players...";
+	// document.getElementById("ready-button").innerText = "Waiting for other players...";
 };
 
 // Socket Events
