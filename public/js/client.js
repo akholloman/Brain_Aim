@@ -10,6 +10,18 @@ const MOVE_FACTOR = 5;
 const NOISE_FACTOR = 3;
 const GAME_TIME_MS = 3 * 60 * 1000;
 
+const SECONDS = 0.25;
+const BUFFER_SIZE = SECONDS * 256;
+const WEIGHT = 0.95;
+
+// BCI Device
+let buffer = new Array();
+let weighted = {
+	alpha: -1,
+	beta: -1,
+	theta: -1
+};
+
 // Art library
 var croquis = new Croquis();
 container.appendChild(croquis.getDOMElement());
@@ -28,7 +40,7 @@ var socket = io();
 var position = {x: 0, y: 0};
 var pressed = {};
 var colors = null;
-var wave = null;
+var btdev = null;
 var upload = false;
 
 // Key handlers for brush movement
@@ -42,7 +54,41 @@ var handler = function (event) {
 };
 
 // Button Events
-document.getElementById("ready-button").onclick = function () {
+document.getElementById("ready-button").onclick = async function () {
+	// Set up BCI device
+	btdev = new Bluetooth.BCIDevice(function (sample) {
+		if (Bluetooth.BCIDevice.electrodeIndex("FP1") !== sample.electrode) return;
+
+		sample.data.forEach(el => {
+			if (buffer.length > BUFFER_SIZE) buffer.shift();
+			buffer.push(el);
+		});
+
+		if (buffer.length < BUFFER_SIZE) return;
+
+		let psd = window.bci.signal.getPSD(BUFFER_SIZE, buffer);
+		
+		let alpha = window.bci.signal.getBandPower(BUFFER_SIZE, psd, 256, "alpha");
+		let beta  = window.bci.signal.getBandPower(BUFFER_SIZE,psd, 256, "beta");
+		let theta = window.bci.signal.getBandPower(BUFFER_SIZE,psd, 256, "theta");
+		let sum = alpha + beta + theta;
+
+		let w_alpha = alpha / sum;
+		let w_beta = beta / sum;
+		let w_theta = theta / sum;
+
+		if (weighted.alpha < 0) {
+			weighted.alpha = w_alpha || 0;
+			weighted.beta = w_beta || 0;
+			weighted.theta = w_theta || 0;
+		} else {
+			weighted.alpha = weighted.alpha * WEIGHT + (w_alpha || 0) * (1 - WEIGHT);
+			weighted.beta =  weighted.beta  * WEIGHT + (w_beta  || 0)  * (1 - WEIGHT);
+			weighted.theta = weighted.theta * WEIGHT + (w_theta || 0) * (1 - WEIGHT);
+		}
+	});
+
+	await btdev.connect();
 	socket.emit("ready");
 	this.setAttribute("disabled", true);
 	this.innerText = "Waiting for other players...";
@@ -231,8 +277,8 @@ var loop = function () {
 		let remap = (x) => (x.value - x.min) / (x.max - x.min);
 
 		// Wave percentages
-		let ap = 0.5; //remap(waves.alpha);
-		let bp = 0.5; //0.5 - remap(waves.beta);
+		let ap = remap(weighted.alpha);
+		let bp = 0.5 - remap(weighted.beta);
 
 		// Add random jitter to the movement
 		let n = noise(1 - ap, NOISE_FACTOR);
@@ -247,7 +293,6 @@ var loop = function () {
 			},
 			brush: {
 				color: chroma.mix(colors[0]._rgb, colors[1]._rgb, bp).hex(),
-				// TODO: Change this to be factored by the ratio of the clientWidth
 				size: 45 * (0.25 + 1.5 * ap) // Adjust the range from [0, 1] -> [0.25, 1.75]
 			}
 		});

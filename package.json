@@ -4,6 +4,7 @@
   "description": "Color with brain",
   "main": "index.js",
   "scripts": {
+    "pack": "echo \"Packing webpack dependencies...\" && node_modules/.bin/webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -22,5 +23,12 @@
     "pug": "^2.0.0-rc.4",
     "socket.io": "^2.0.4",
     "socket.io-stream": "^0.9.1"
+  },
+  "devDependencies": {
+    "ganglion-ble": "^1.0.0",
+    "muse-js": "^2.0.0",
+    "ts-loader": "^3.5.0",
+    "typescript": "^2.7.2",
+    "webpack": "^3.11.0"
   }
 }

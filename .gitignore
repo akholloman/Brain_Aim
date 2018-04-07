@@ -3,6 +3,9 @@ node_modules/
 public/image/gallery/*.gif
 .DS_Store
 
+public/js/ts_src/
+public/js/BCIDevice.build.js
+
 # Files
 package-lock.json
 config.js
