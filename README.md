@@ -7,6 +7,12 @@ npm install
 
 Then, rename `config.js.example` to `config.js`, making sure to change the values to fit your environment.
 
+Finally, build the web pack and start the server
+```
+npm run pack
+node index.js
+```
+
 ## External Dependencies
 - [Modal.js](https://github.com/mhottman-templates/modal-vanilla.js): Used for displaying the player
 modal
